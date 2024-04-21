@@ -8,6 +8,7 @@ import (
 type CustomerService interface {
 	Create(data *models.CreateCustomerReq) (*models.CreateCustomerRes, error)
 	GetAllCustomer() (*models.GetAllCustomerRes, error)
+	GetCustomer(id int) (*models.CreateCustomerRes, error)
 }
 
 type customerService struct {
@@ -60,4 +61,23 @@ func (s *customerService) GetAllCustomer() (*models.GetAllCustomerRes, error) {
 	}
 
 	return res, err
+}
+
+func (s *customerService) GetCustomer(id int) (*models.CreateCustomerRes, error) {
+	custData, err := s.repo.GetCustomer(id)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &models.CreateCustomerRes{
+		ID:            custData.Customer.ID,
+		Name:          custData.Customer.Name,
+		DOB:           custData.Customer.DOB,
+		PhoneNum:      custData.Customer.PhoneNum,
+		Email:         custData.Customer.Email,
+		NationalityID: custData.Customer.NationalityID,
+		FamMember:     custData.FamMember,
+	}
+
+	return response, err
 }

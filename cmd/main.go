@@ -25,6 +25,7 @@ func main() {
 
 	r.HandleFunc("/customers", handler.Create).Methods("POST")
 	r.HandleFunc("/customers", handler.GetAllCustomer).Methods("GET")
+	r.HandleFunc("/customers/{id}", handler.GetCustomer).Methods("GET")
 
 	port := fmt.Sprintf(":%s", os.Getenv("APP_PORT"))
 	log.Println("api server listening to port", port)

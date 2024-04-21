@@ -5,6 +5,9 @@ import (
 	"customer-data-api/internal/services"
 	"customer-data-api/pkg"
 	"net/http"
+	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 type customerHandler struct {
@@ -39,4 +42,21 @@ func (h *customerHandler) GetAllCustomer(w http.ResponseWriter, r *http.Request)
 	}
 
 	pkg.WriteJson(w, http.StatusOK, custRes)
+}
+
+func (h *customerHandler) GetCustomer(w http.ResponseWriter, r *http.Request) {
+	idMux := mux.Vars(r)["id"]
+	id, err := strconv.Atoi(idMux)
+	if err != nil {
+		pkg.WriteJsonError(w, err)
+		return
+	}
+
+	res, err := h.serv.GetCustomer(id)
+	if err != nil {
+		pkg.WriteJsonError(w, err)
+		return
+	}
+
+	pkg.WriteJson(w, http.StatusOK, res)
 }
