@@ -8,6 +8,7 @@ import (
 
 type CustomerRepo interface {
 	Create(data *models.CustomerData) error
+	GetAllCustomer() ([]models.Customer, error)
 }
 
 type customerRepo struct {
@@ -42,4 +43,21 @@ func (r *customerRepo) Create(data *models.CustomerData) error {
 	}
 
 	return nil
+}
+
+func (r *customerRepo) GetAllCustomer() ([]models.Customer, error) {
+	query := `SELECT * from customer`
+	rows, err := r.DB.Query(query)
+	if err != nil {
+		return nil, err
+	}
+
+	customer := []models.Customer{}
+	for rows.Next() {
+		cust := models.Customer{}
+		rows.Scan(&cust.ID, &cust.NationalityID, &cust.Name, &cust.DOB, &cust.PhoneNum, &cust.Email)
+		customer = append(customer, cust)
+	}
+
+	return customer, nil
 }

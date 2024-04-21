@@ -9,3 +9,7 @@ type CreateCustomerRes struct {
 	Email         string         `json:"email" db:"cst_email"`
 	FamMember     []FamilyMember `json:"keluarga"`
 }
+
+type GetAllCustomerRes struct {
+	Data []Customer `json:"data"`
+}

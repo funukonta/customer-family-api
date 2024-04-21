@@ -30,3 +30,13 @@ func (h *customerHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	pkg.WriteJson(w, http.StatusOK, res)
 }
+
+func (h *customerHandler) GetAllCustomer(w http.ResponseWriter, r *http.Request) {
+	custRes, err := h.serv.GetAllCustomer()
+	if err != nil {
+		pkg.WriteJsonError(w, err)
+		return
+	}
+
+	pkg.WriteJson(w, http.StatusOK, custRes)
+}

@@ -24,7 +24,7 @@ func main() {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/customers", handler.Create).Methods("POST")
-	r.HandleFunc("/customers", handler.Create).Methods("GET")
+	r.HandleFunc("/customers", handler.GetAllCustomer).Methods("GET")
 
 	port := fmt.Sprintf(":%s", os.Getenv("APP_PORT"))
 	log.Println("api server listening to port", port)
