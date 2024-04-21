@@ -18,6 +18,14 @@ type UpdateCustomerReq struct {
 	FamMember     []FamilyMember `json:"keluarga"`
 }
 
+type DeleteCustomerReq struct {
+	FamId []FamilyIdDelete `json:"keluarga"`
+}
+
+type FamilyIdDelete struct {
+	ID int `json:"id"`
+}
+
 // type Customer struct {
 // 	ID            int    `json:"id" db:"cst_id"`
 // 	NationalityID int    `json:"nationality_id" db:"nationality_id"`

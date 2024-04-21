@@ -11,6 +11,7 @@ type CustomerRepo interface {
 	GetAllCustomer() ([]models.Customer, error)
 	GetCustomer(id int) (*models.CustomerData, error)
 	UpdateCustomer(data *models.CustomerData) error
+	DeleteCustomer(data *models.DeleteCustomerReq, custID int) error
 }
 
 type customerRepo struct {
@@ -104,7 +105,7 @@ func (r *customerRepo) UpdateCustomer(data *models.CustomerData) error {
 		return err
 	}
 	defer tx.Rollback()
-	err = tx.QueryRow(query, data.Customer.Name, data.Customer.DOB, data.Customer.PhoneNum, data.Customer.Email).Scan(&data.Customer.Name, &data.Customer.DOB, &data.Customer.PhoneNum, &data.Customer.Email)
+	err = tx.QueryRow(query, data.Customer.Name, data.Customer.DOB, data.Customer.PhoneNum, data.Customer.Email, data.Customer.ID).Scan(&data.Customer.Name, &data.Customer.DOB, &data.Customer.PhoneNum, &data.Customer.Email)
 	if err != nil {
 		return err
 	}
@@ -113,6 +114,29 @@ func (r *customerRepo) UpdateCustomer(data *models.CustomerData) error {
 	RETURNING cst_id,fl_relation,fl_name,fl_dob`
 	for _, fam := range data.FamMember {
 		err = tx.QueryRow(query, fam.CustomerID, fam.Relation, fam.Name, fam.DOB).Scan(&fam.CustomerID, &fam.Relation, &fam.Name, &fam.DOB)
+		if err != nil {
+			return err
+		}
+	}
+	return tx.Commit()
+}
+
+func (r *customerRepo) DeleteCustomer(data *models.DeleteCustomerReq, custID int) error {
+	query := `DELETE from customer where cst_id=?`
+	tx, err := r.DB.BeginTx(context.Background(), nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	_, err = tx.Exec(query, custID)
+	if err != nil {
+		return err
+	}
+
+	query = `DELETE from family_list fl_id=?`
+	for _, fam := range data.FamId {
+		_, err = tx.Exec(query, fam.ID)
 		if err != nil {
 			return err
 		}
