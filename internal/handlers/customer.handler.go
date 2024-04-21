@@ -60,3 +60,25 @@ func (h *customerHandler) GetCustomer(w http.ResponseWriter, r *http.Request) {
 
 	pkg.WriteJson(w, http.StatusOK, res)
 }
+
+func (h *customerHandler) UpdateCustomer(w http.ResponseWriter, r *http.Request) {
+	idMux := mux.Vars(r)["id"]
+	id, err := strconv.Atoi(idMux)
+	if err != nil {
+		pkg.WriteJsonError(w, err)
+		return
+	}
+	req := models.UpdateCustomerReq{}
+	if err := pkg.GetJsonBody(r, &req); err != nil {
+		pkg.WriteJsonError(w, err)
+		return
+	}
+
+	res, err := h.serv.UpdateCustomer(&req, id)
+	if err != nil {
+		pkg.WriteJsonError(w, err)
+		return
+	}
+
+	pkg.WriteJson(w, http.StatusOK, res)
+}

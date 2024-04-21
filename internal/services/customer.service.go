@@ -8,7 +8,8 @@ import (
 type CustomerService interface {
 	Create(data *models.CreateCustomerReq) (*models.CreateCustomerRes, error)
 	GetAllCustomer() (*models.GetAllCustomerRes, error)
-	GetCustomer(id int) (*models.CreateCustomerRes, error)
+	GetCustomer(id int) (*models.GetCustomerRes, error)
+	UpdateCustomer(data *models.UpdateCustomerReq, id int) (*models.UpdateCustomerRes, error)
 }
 
 type customerService struct {
@@ -63,13 +64,13 @@ func (s *customerService) GetAllCustomer() (*models.GetAllCustomerRes, error) {
 	return res, err
 }
 
-func (s *customerService) GetCustomer(id int) (*models.CreateCustomerRes, error) {
+func (s *customerService) GetCustomer(id int) (*models.GetCustomerRes, error) {
 	custData, err := s.repo.GetCustomer(id)
 	if err != nil {
 		return nil, err
 	}
 
-	response := &models.CreateCustomerRes{
+	response := &models.GetCustomerRes{
 		ID:            custData.Customer.ID,
 		Name:          custData.Customer.Name,
 		DOB:           custData.Customer.DOB,
@@ -80,4 +81,37 @@ func (s *customerService) GetCustomer(id int) (*models.CreateCustomerRes, error)
 	}
 
 	return response, err
+}
+
+func (s *customerService) UpdateCustomer(data *models.UpdateCustomerReq, id int) (*models.UpdateCustomerRes, error) {
+	customer := models.Customer{
+		ID:            id,
+		Name:          data.Name,
+		DOB:           data.DOB,
+		PhoneNum:      data.PhoneNum,
+		Email:         data.Email,
+		NationalityID: data.NationalityID,
+	}
+
+	customerData := models.CustomerData{
+		FamMember: data.FamMember,
+		Customer:  customer,
+	}
+
+	err := s.repo.Create(&customerData)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &models.UpdateCustomerRes{
+		ID:            customerData.Customer.ID,
+		Name:          data.Name,
+		DOB:           data.DOB,
+		PhoneNum:      data.PhoneNum,
+		Email:         data.Email,
+		NationalityID: data.NationalityID,
+		FamMember:     customerData.FamMember,
+	}
+
+	return response, nil
 }

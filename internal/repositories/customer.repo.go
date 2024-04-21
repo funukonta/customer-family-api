@@ -10,6 +10,7 @@ type CustomerRepo interface {
 	Create(data *models.CustomerData) error
 	GetAllCustomer() ([]models.Customer, error)
 	GetCustomer(id int) (*models.CustomerData, error)
+	UpdateCustomer(data *models.CustomerData) error
 }
 
 type customerRepo struct {
@@ -43,7 +44,7 @@ func (r *customerRepo) Create(data *models.CustomerData) error {
 		}
 	}
 
-	return nil
+	return tx.Commit()
 }
 
 func (r *customerRepo) GetAllCustomer() ([]models.Customer, error) {
@@ -93,4 +94,28 @@ func (r *customerRepo) GetCustomer(id int) (*models.CustomerData, error) {
 	}
 
 	return custData, nil
+}
+
+func (r *customerRepo) UpdateCustomer(data *models.CustomerData) error {
+	query := `UPDATE customer set cst_name=?,cst_dob=?,cst_phoneNum=?,cst_email=? where cst_id=?
+	RETURNING cst_name,cst_dob,cst_phoneNum,cst_email`
+	tx, err := r.DB.BeginTx(context.Background(), nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	err = tx.QueryRow(query, data.Customer.Name, data.Customer.DOB, data.Customer.PhoneNum, data.Customer.Email).Scan(&data.Customer.Name, &data.Customer.DOB, &data.Customer.PhoneNum, &data.Customer.Email)
+	if err != nil {
+		return err
+	}
+
+	query = `UPDATE family_list cst_id=?,fl_relation=?,fl_name=?,fl_dob=? where cst_id=?
+	RETURNING cst_id,fl_relation,fl_name,fl_dob`
+	for _, fam := range data.FamMember {
+		err = tx.QueryRow(query, fam.CustomerID, fam.Relation, fam.Name, fam.DOB).Scan(&fam.CustomerID, &fam.Relation, &fam.Name, &fam.DOB)
+		if err != nil {
+			return err
+		}
+	}
+	return tx.Commit()
 }
